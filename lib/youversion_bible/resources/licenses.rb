@@ -3,11 +3,11 @@ module YouversionBible
     module Licenses
       # GET /licenses
       # Supports bible_id, developer_id, all_available per docs.
-      def licenses(bible_id: nil, developer_id: nil, all_available: nil)
+      def licenses(bible_id: nil, all_available: true, developer_id: nil)
+        # TODO this one doesn't seem to work with the normal API key, figure out why
         request(
-          method: :get,
           path: "/licenses",
-          query: { bible_id: bible_id, developer_id: developer_id, all_available: all_available }
+          query: { all_available: all_available, bible_id: bible_id, developer_id: developer_id }
         )
       end
     end

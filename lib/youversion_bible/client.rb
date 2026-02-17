@@ -1,19 +1,18 @@
 require "excon"
 require "json"
 
+require_relative "resources/bibles"
+require_relative "resources/highlights"
+require_relative "resources/languages"
+require_relative "resources/licenses"
+require_relative "resources/organizations"
+require_relative "resources/verse_of_the_day"
+
 module YouversionBible
   class Client
     def initialize(config = YouversionBible.configuration)
       @config = config
       validate!
-      @connection = Excon.new(
-        @config.base_url,
-        connect_timeout: @config.open_timeout,
-        read_timeout: @config.timeout,
-        write_timeout: @config.timeout,
-        idempotent: true,
-        retry_limit: @config.idempotent_retry_limit
-      )
     end
 
     # Mix in resource modules
@@ -31,20 +30,13 @@ module YouversionBible
       raise ConfigurationError, "base_url is required" if @config.base_url.to_s.strip.empty?
     end
 
-    def request(method:, path:, query: nil, body: nil, headers: {})
-      qs = Util::Query.encode(query)
-      full_path = qs.empty? ? path : "#{path}?#{qs}"
-
+    def request(path:, query: nil, body: nil, headers: {}, method: :get)
       request_headers = default_headers.merge(headers)
       payload = body.nil? ? nil : JSON.generate(body)
-
-      response = @connection.request(
-        method: method,
-        path: full_path,
-        headers: request_headers,
-        body: payload
-      )
-
+      url = @config.base_url + path
+      params = query.present? ? query : {}
+      connection = Excon.new(url, headers: request_headers, query: params.to_query, body: payload)
+      response = connection.request(method: method)
       handle_response(response)
     end
 

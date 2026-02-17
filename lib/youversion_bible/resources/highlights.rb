@@ -1,10 +1,12 @@
 module YouversionBible
   module Resources
     module Highlights
+      # TODO not sure how these are supposed to work
+      # it looks like per user as we get an API key error but docs are not clear
+
       # GET /highlights?bible_id=...&passage_id=...
       def highlights(bible_id:, passage_id:)
         request(
-          method: :get,
           path: "/highlights",
           query: { bible_id: bible_id, passage_id: passage_id }
         )
